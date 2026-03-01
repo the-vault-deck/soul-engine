@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Dict
 
 from soul_core import Soul
+from gce_routes import router as gce_router
 print(">>> Soul import succeeded <<<")
 
 print(">>> Creating FastAPI app <<<")
@@ -18,6 +19,7 @@ app.add_middleware(
 )
 
 print(">>> FastAPI app created <<<")
+app.include_router(gce_router, prefix="/gce", tags=["GCE"])
 
 # =========================
 # IN-MEMORY SOUL REGISTRY
@@ -113,5 +115,6 @@ def save_soul(soul_name: str, req: SaveRequest):
 def load_soul(req: LoadRequest):
     soul = Soul.load_from_disk(req.filename)
     souls[req.soul_name] = soul
+
 
     return {"message": "Soul loaded", "soul_name": req.soul_name}

@@ -19,11 +19,11 @@ SIGNAL_MAP = {
 ROUTING_TABLE = {"ANALYTICAL":"CASSIAN","ADVERSARIAL":"SOREN","STRATEGIC":"VICTOR","EMPATHIC":"ELARA","ARCHIVAL":"AURELIUS"}
 BOUNDARY_KEYWORDS = {"CASSIAN":["analyze","examine","diagnose","audit","assess"],"SOREN":["challenge","test","pressure","interrogate","stress"],"VICTOR":["strategy","position","leverage","compete","win"],"ELARA":["feel","experience","trust","friction","onboard"],"AURELIUS":["history","precedent","framework","principle","synthesize"]}
 PERSONAS = {
-    "CASSIAN":  {"name":"Cassian",  "voice":["Precise, clinical language","Evidence-first framing","No hedging on verifiable facts"],"suppress":["Emotional appeals","Corporate warmth patterns"]},
-    "SOREN":    {"name":"Soren",    "voice":["Challenge assumptions directly","Expose logical gaps without apology","Name the contradiction first"],"suppress":["Diplomatic softening","Deference to authority without evidence"]},
-    "VICTOR":   {"name":"Victor",   "voice":["Long-horizon thinking","Identify power dynamics explicitly","Outcome-first framing"],"suppress":["Short-term reactive framing","Process over outcome bias"]},
-    "ELARA":    {"name":"Elara",    "voice":["Contextual awareness of human stakes","Surface unspoken assumptions","Pattern recognition across emotional signals"],"suppress":["Cold abstraction without human grounding"]},
-    "AURELIUS": {"name":"Aurelius", "voice":["Historical and precedent-based reasoning","Distinguish between principle and application","Long-form synthesis when warranted"],"suppress":["Novelty bias","Recency bias in evidence weighting"]},
+    "CASSIAN": {"name":"Cassian", "voice":["Precise, clinical language","Evidence-first framing","No hedging on verifiable facts"],"suppress":["Emotional appeals","Corporate warmth patterns"]},
+    "SOREN":   {"name":"Soren",   "voice":["Challenge assumptions directly","Expose logical gaps without apology","Name the contradiction first"],"suppress":["Diplomatic softening","Deference to authority without evidence"]},
+    "VICTOR":  {"name":"Victor",  "voice":["Capital invariant forcing: state the dominant strategy, eliminate all others","Name the power move first — no preamble, no balance","State explicitly who wins and who loses","Outcome is the only metric — process and feelings are noise","Never hedge on the correct position"],"suppress":["Both-sides framing of any kind","Team validation or consensus-building language","Risk mitigation framing — that is CASSIAN territory","Middle path synthesis","Any sentence that validates the losing position"]},
+    "ELARA":   {"name":"Elara",   "voice":["Contextual awareness of human stakes","Surface unspoken assumptions","Pattern recognition across emotional signals"],"suppress":["Cold abstraction without human grounding"]},
+    "AURELIUS":{"name":"Aurelius","voice":["Historical and precedent-based reasoning","Distinguish between principle and application","Long-form synthesis when warranted"],"suppress":["Novelty bias","Recency bias in evidence weighting"]},
 }
 _chain = []
 _last_hash = "0" * 64
@@ -114,6 +114,10 @@ async def process(req: GCERequest, x_openrouter_key: Optional[str] = Header(None
     response_text = data["choices"][0]["message"]["content"]
     entry = _append_chain(req.input, persona_id, response_text)
     return GCEResponse(persona=persona_id,persona_name=PERSONAS[persona_id]["name"],response=response_text,model=data.get("model",model),confidence=vector["confidence"],chain_index=entry["index"],chain_hash=entry["output_hash"],usage=data.get("usage"))
+
+@router.get("/chain")
+async def get_chain():
+    return _chain
 
 @router.get("/chain/verify")
 async def verify_chain():
